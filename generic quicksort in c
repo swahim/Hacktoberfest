@@ -1,0 +1,159 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+typedef struct _stack_node
+{
+void *ptr;
+struct _stack_node *next;
+}StackNode;
+
+typedef struct _stack_start
+{
+int size;
+struct _stack_node *top;
+struct _stack_node *end;
+int elementSize;
+}Stack;
+void initStack(Stack *stack,int elementSize)
+{
+stack->top=NULL;
+stack->end=NULL;
+stack->size=0;
+stack->elementSize=elementSize;
+}
+void push(Stack *stack,const void *ptr)
+{
+StackNode *t;
+t=(StackNode *)malloc(sizeof(StackNode));
+t->next=NULL;
+t->ptr=(void *)malloc(sizeof(stack->elementSize));
+memcpy(t->ptr,ptr,stack->elementSize);
+
+if(stack->size==0)
+{
+stack->top=stack->end=t;
+}
+else
+{
+t->next=stack->top;
+stack->top=t;
+}
+stack->size++;
+}
+
+void pop(Stack *stack,void *ptr)
+{
+StackNode *t;
+t=stack->top;
+memcpy(ptr,(const void*)t->ptr,stack->elementSize);
+if(stack->size==1)
+{
+stack->top=stack->end=NULL;
+}
+else
+{
+stack->top=stack->top->next;
+}
+stack->size--;
+free(t);
+}
+
+int isEmpty(Stack *stack)
+{
+return stack->size==0;
+}
+
+
+
+int findPartition(void *x,int lb,int ub,int elementSize,int (*p2f)(void *,void *))
+{
+int e,f,pp;
+e=lb;
+f=ub;
+void *c=(void *)malloc(elementSize);
+while(e<f)
+{
+while(p2f((x+(e*elementSize)),(x+(lb*elementSize)))<=0 && e<ub)e++;
+while(p2f((x+(f*elementSize)),(x+(lb*elementSize)))>0)f--;
+if(e<f)
+{
+memcpy(c,(x+(e*elementSize)),elementSize);
+memcpy((x+(e*elementSize)),(x+f*elementSize),elementSize);
+memcpy((x+(f*elementSize)),c,elementSize);
+}
+else
+{
+memcpy(c,(x+(f*elementSize)),elementSize);
+memcpy(x+(f*elementSize),(x+(lb*elementSize)),elementSize);
+memcpy((x+(lb*elementSize)),c,elementSize);
+pp=f;
+}
+}
+free(c);
+return pp;
+}
+
+
+
+
+void quickSort(void *ptr,int lb,int ub,int elementSize,int (*p2f)(void *,void *))
+{
+typedef struct lbub
+{
+int lb,ub;
+}lbub;
+int a,b,pp,ppleft,ppright;
+Stack stack;
+initStack(&stack,sizeof(lbub));
+lbub lbub1,ab,a1,b1;
+lbub1.lb=lb;
+lbub1.ub=ub;
+push(&stack,&lbub1);
+
+while(!isEmpty(&stack))
+{
+pop(&stack,(void *)&ab);
+a=ab.lb;
+b=ab.ub;
+pp = findPartition(ptr,a,b,elementSize,p2f);
+ppleft=pp-1;
+ppright=pp+1;
+if(b>ppright)
+{
+b1.lb=ppright;
+b1.ub=b;
+push(&stack,&b1);
+}
+if(a<ppleft)
+{
+a1.ub=ppleft;
+a1.lb=a;
+push(&stack,&a1);
+}}}
+
+
+
+
+
+int myComparator(void *left,void *right)
+{
+int *a,*b;
+a=(int *)left;
+b=(int *)right;
+return *a-*b;
+}
+
+
+
+int main()
+{
+int *x,y;
+x=(int *)malloc(sizeof(int)*10);
+for(y=0;y<=9;y++)
+{
+scanf("%d",&x[y]);
+}
+quickSort((void *)x,0,9,sizeof(int),myComparator);
+for(y=0;y<=9;y++)printf("%d\n",x[y]);
+return 0;
+}
